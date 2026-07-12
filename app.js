@@ -1890,12 +1890,19 @@ function escHtml(str) {
 
 function checkWeekStatus() {
   if (!state.week) { showWizard(); return; }
-  const currentMonday = weekMondayISO();
-  if (state.week.weekStartDate < currentMonday) {
-    showNewWeekNotice(currentMonday);
+  if (state.week.weekStartDate < weekMondayISO()) {
+    autoCarryWeekForward();
   } else {
     checkMorningCard();
   }
+}
+
+function autoCarryWeekForward() {
+  const w = state.week;
+  const newSprints = (w.sprints||[]).filter(sp => sp.endCondition === 'ongoing').map(sp => ({...sp}));
+  state.week = { ...w, weekStartDate: weekMondayISO(), sprints: newSprints };
+  saveWeek();
+  checkMorningCard();
 }
 
 function showNewWeekNotice(newMonday) {
